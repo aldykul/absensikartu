@@ -268,6 +268,33 @@
         Chart.defaults.font.family = 'Inter';
         Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
 
+        // ==========================================
+        // FUNGSI UNTUK MEMPERBAIKI BUG WAKTU 1899
+        // ==========================================
+        function formatWaktuBug(waktuStr) {
+            if (!waktuStr || waktuStr === "" || waktuStr === "-") return "-";
+            
+            // Jika Google Sheet memunculkan format tanggal kuno (1899-12-30)
+            if (waktuStr.includes("1899-12-30T")) {
+                try {
+                    let d = new Date(waktuStr);
+                    // Konversi ke zona Waktu Indonesia Timur (WIT / Asia/Jayapura)
+                    let jam = d.toLocaleTimeString('id-ID', { 
+                        timeZone: 'Asia/Jayapura', 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit', 
+                        hour12: false 
+                    });
+                    // Pastikan formatnya memakai titik dua (HH:MM:SS) bukan titik (HH.MM.SS)
+                    return jam.replace(/\./g, ':');
+                } catch (e) {
+                    return waktuStr;
+                }
+            }
+            return waktuStr;
+        }
+
         function renderCharts(statsData) {
             const arrSiswa = Object.keys(statsData).map(nama => {
                 return {
@@ -414,8 +441,11 @@
                         const tanggal = String(row[0]).trim();
                         const nama = String(row[1]).trim();
                         const kelas = String(row[2]).trim() === "" ? "-" : String(row[2]).trim();
-                        const jamPagi = String(row[3]).trim() === "" ? "-" : String(row[3]).trim();
-                        const jamPulang = String(row[4]).trim() === "" ? "-" : String(row[4]).trim();
+                        
+                        // TERAPKAN FILTER WAKTU DI SINI
+                        const jamPagi = formatWaktuBug(String(row[3]).trim());
+                        const jamPulang = formatWaktuBug(String(row[4]).trim());
+                        
                         const status = String(row[5]).trim();
                         const statusLower = status.toLowerCase();
 
