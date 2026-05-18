@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Presensi - SMA Negeri 2 Buru</title>
+    <title>Portal Presensi - SMAN 2 Buru & SMKN 1 Buru</title>
     
     <link rel="icon" type="image/jpeg" href="images (3).jpg">
     
@@ -125,13 +125,13 @@
             <div class="flex flex-col md:flex-row items-center text-center md:text-left gap-6 md:gap-8">
                 <div class="shrink-0 relative">
                     <div class="absolute inset-0 bg-indigo-500/20 rounded-xl blur-md"></div>
-                    <img src="images (3).jpg" alt="Logo SMA N 2 Buru" class="w-28 h-28 md:w-32 md:h-32 object-contain rounded-xl border-2 border-white/30 p-2 relative z-10 bg-white/10">
+                    <img src="images (3).jpg" alt="Logo Sekolah" class="w-28 h-28 md:w-32 md:h-32 object-contain rounded-xl border-2 border-white/30 p-2 relative z-10 bg-white/10">
                 </div>
                 
                 <div class="flex flex-col justify-center">
                     <div class="mb-2 flex justify-center md:justify-start">
                         <span class="glass-pill px-4 py-1.5 text-[10px] md:text-xs font-bold text-indigo-200 uppercase tracking-widest flex items-center gap-2">
-                            <i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-400"></i> IoT Fingerprint System
+                            <i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-400"></i> IoT RFID System
                         </span>
                     </div>
                     <h1 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-md">
@@ -145,7 +145,7 @@
             
             <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
                 
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdg3hepZS3QjRkfo5Fy_I6gGGwYEfHNlngmx-NVcBVQBYqmQQ/viewform?usp=dialog" target="_blank" class="glass-pill px-5 py-3 flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 w-full sm:w-auto group cursor-pointer" style="text-decoration: none;">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScvvSKEc8ZGyORpHQoXVagxO6hp9iu28OASoDQ6MgXJXppcqQ/viewform?usp=header" target="_blank" class="glass-pill px-5 py-3 flex items-center justify-center gap-2 hover:bg-white/20 transition-all duration-300 w-full sm:w-auto group cursor-pointer" style="text-decoration: none;">
                     <i data-lucide="file-edit" class="w-4 h-4 text-blue-300 group-hover:text-white transition-colors"></i>
                     <span class="text-xs font-bold text-blue-200 group-hover:text-white tracking-wide transition-colors">Form Izin / Sakit</span>
                 </a>
@@ -186,7 +186,7 @@
                         <i data-lucide="server" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-lg text-white">Database ESP32 Real-time</h2>
+                        <h2 class="font-bold text-lg text-white">Database RFID Real-time</h2>
                         <p class="text-xs text-slate-300 mt-0.5" id="waktu-update">Menghubungkan ke API Google...</p>
                     </div>
                 </div>
@@ -257,6 +257,7 @@
             lucide.createIcons();
         }
 
+        // LINK WEB APP AKTIF
         const API_URL = 'https://script.google.com/macros/s/AKfycbyLdQw3dXfwqirFbPe60t4mzqYVhX1i_nRJ6Ft9vWLwIKCB5gi5dSPXBsfBUTg6JNJR/exec?action=getData';
         
         let cachedHTML = ""; 
@@ -268,17 +269,12 @@
         Chart.defaults.font.family = 'Inter';
         Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
 
-        // ==========================================
-        // FUNGSI UNTUK MEMPERBAIKI BUG WAKTU 1899
-        // ==========================================
+        // PENYARING MANUAL UNTUK FORMAT 1899 GOOGLE APPS SCRIPT
         function formatWaktuBug(waktuStr) {
             if (!waktuStr || waktuStr === "" || waktuStr === "-") return "-";
-            
-            // Jika Google Sheet memunculkan format tanggal kuno (1899-12-30)
             if (waktuStr.includes("1899-12-30T")) {
                 try {
                     let d = new Date(waktuStr);
-                    // Konversi ke zona Waktu Indonesia Timur (WIT / Asia/Jayapura)
                     let jam = d.toLocaleTimeString('id-ID', { 
                         timeZone: 'Asia/Jayapura', 
                         hour: '2-digit', 
@@ -286,7 +282,6 @@
                         second: '2-digit', 
                         hour12: false 
                     });
-                    // Pastikan formatnya memakai titik dua (HH:MM:SS) bukan titik (HH.MM.SS)
                     return jam.replace(/\./g, ':');
                 } catch (e) {
                     return waktuStr;
@@ -301,7 +296,6 @@
                     nama: nama,
                     hadir: statsData[nama].hadir,
                     bermasalah: statsData[nama].bermasalah, 
-                    // Urutan Array Detail: [Terlambat, Bolos, Lambat&Bolos, Alpa, Izin/Sakit]
                     detail: [
                         statsData[nama].lambat, 
                         statsData[nama].bolos, 
@@ -315,7 +309,6 @@
             const topTeladan = [...arrSiswa].sort((a, b) => b.hadir - a.hadir).slice(0, 5);
             const topKurang = [...arrSiswa].sort((a, b) => b.bermasalah - a.bermasalah).slice(0, 5);
 
-            // -- RENDER GRAFIK TELADAN --
             const ctxTeladan = document.getElementById('chartTeladan').getContext('2d');
             if (chartTeladanInstance) chartTeladanInstance.destroy();
             chartTeladanInstance = new Chart(ctxTeladan, {
@@ -339,7 +332,6 @@
                 }
             });
 
-            // -- RENDER GRAFIK PERLU PERHATIAN --
             const ctxKurang = document.getElementById('chartKurang').getContext('2d');
             if (chartKurangInstance) chartKurangInstance.destroy();
             chartKurangInstance = new Chart(ctxKurang, {
@@ -350,35 +342,35 @@
                         {
                             label: 'Terlambat',
                             data: topKurang.map(s => s.detail[0]),
-                            backgroundColor: 'rgba(251, 191, 36, 0.7)', // Kuning
+                            backgroundColor: 'rgba(251, 191, 36, 0.7)', 
                             borderColor: 'rgba(251, 191, 36, 1)',
                             borderWidth: 1
                         },
                         {
                             label: 'Bolos',
                             data: topKurang.map(s => s.detail[1]),
-                            backgroundColor: 'rgba(244, 63, 94, 0.7)', // Merah Terang
+                            backgroundColor: 'rgba(244, 63, 94, 0.7)', 
                             borderColor: 'rgba(244, 63, 94, 1)',
                             borderWidth: 1
                         },
                         {
                             label: 'Terlambat dan Bolos',
                             data: topKurang.map(s => s.detail[2]),
-                            backgroundColor: 'rgba(159, 18, 57, 0.7)', // Merah Tua
+                            backgroundColor: 'rgba(159, 18, 57, 0.7)', 
                             borderColor: 'rgba(159, 18, 57, 1)',
                             borderWidth: 1
                         },
                         {
-                            label: 'Alpa (Tanpa Keterangan)',
+                            label: 'Alpa',
                             data: topKurang.map(s => s.detail[3]),
-                            backgroundColor: 'rgba(71, 85, 105, 0.7)', // Slate
+                            backgroundColor: 'rgba(71, 85, 105, 0.7)', 
                             borderColor: 'rgba(71, 85, 105, 1)',
                             borderWidth: 1
                         },
                         {
                             label: 'Izin / Sakit',
                             data: topKurang.map(s => s.detail[4]),
-                            backgroundColor: 'rgba(56, 189, 248, 0.7)', // Biru Muda
+                            backgroundColor: 'rgba(56, 189, 248, 0.7)', 
                             borderColor: 'rgba(56, 189, 248, 1)',
                             borderWidth: 1
                         }
@@ -430,11 +422,9 @@
 
                 let newHTML = "";
                 let adaData = false;
-                
                 let statsTracker = {}; 
 
                 dataLaporan.forEach(row => {
-                    // Cek minimal 6 kolom (sampai kolom F/Status)
                     if (row.length >= 6 && row[1] !== null && String(row[1]).trim() !== "") {
                         adaData = true;
                         
@@ -442,7 +432,6 @@
                         const nama = String(row[1]).trim();
                         const kelas = String(row[2]).trim() === "" ? "-" : String(row[2]).trim();
                         
-                        // TERAPKAN FILTER WAKTU DI SINI
                         const jamPagi = formatWaktuBug(String(row[3]).trim());
                         const jamPulang = formatWaktuBug(String(row[4]).trim());
                         
